@@ -1,18 +1,17 @@
 {
-  "name": "express-graphql",
+  "name": "apollo-express-graphql",
   "version": "0.5.1",
   "description": "Create a GraphQL HTTP server with Express.",
   "contributors": [
-    "Lee Byron <lee@leebyron.com> (http://leebyron.com/)",
-    "Daniel Schafer <dschafer@fb.com>"
+    "Jonas Helfer <jonas@helfer.email>",
   ],
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/graphql/express-graphql/issues"
+    "url": "https://github.com/apollostack/express-graphql/issues"
   },
   "repository": {
     "type": "git",
-    "url": "http://github.com/graphql/express-graphql.git"
+    "url": "http://github.com/apollostack/express-graphql.git"
   },
   "keywords": [
     "express",
