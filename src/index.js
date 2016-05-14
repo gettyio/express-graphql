@@ -135,6 +135,7 @@ export default function graphqlHTTP(options: Options): Middleware {
 
       function defaultLogFn() {
         // nothing
+        return null;
       }
 
       // Collect information from the options data object.
