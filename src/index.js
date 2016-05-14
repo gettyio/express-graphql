@@ -133,6 +133,10 @@ export default function graphqlHTTP(options: Options): Middleware {
         throw new Error( 'LogFn must be a function' );
       }
 
+      function defaultLogFn() {
+        // nothing
+      }
+
       // Collect information from the options data object.
       schema = optionsData.schema;
       context = optionsData.context;
@@ -140,7 +144,7 @@ export default function graphqlHTTP(options: Options): Middleware {
       pretty = optionsData.pretty;
       graphiql = optionsData.graphiql;
       formatErrorFn = optionsData.formatError;
-      logFn = optionsData.logFn || () => null;
+      logFn = optionsData.logFn || defaultLogFn;
 
       shouldLog = Boolean(optionsData.logFn);
 
