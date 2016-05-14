@@ -1,9 +1,9 @@
 {
-  "name": "apollo-express-graphql",
+  "name": "express-widgetizer",
   "version": "0.5.1",
   "description": "Create a GraphQL HTTP server with Express.",
   "contributors": [
-    "Jonas Helfer <jonas@helfer.email>",
+    "Jonas Helfer <jonas@helfer.email>"
   ],
   "license": "BSD-3-Clause",
   "bugs": {

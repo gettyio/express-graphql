@@ -56,6 +56,11 @@ export type OptionsData = {
   pretty?: ?boolean,
 
   /**
+   * A function called to log events
+   */
+   logFn?: ?Function,
+
+  /**
    * An optional function which will be used to format any errors produced by
    * fulfilling a GraphQL operation. If no function is provided, GraphQL's
    * default spec-compliant `formatError` function will be used.
@@ -99,6 +104,8 @@ export default function graphqlHTTP(options: Options): Middleware {
     let variables;
     let operationName;
     let validationRules;
+    let logFn;
+    let shouldLog;
 
     // Promises are used as a mechanism for capturing any thrown errors during
     // the asyncronous process below.
@@ -122,6 +129,10 @@ export default function graphqlHTTP(options: Options): Middleware {
         );
       }
 
+      if (optionsData.logFn && typeof optionsData.logFn !== 'function') {
+        throw new Error( 'LogFn must be a function' );
+      }
+
       // Collect information from the options data object.
       schema = optionsData.schema;
       context = optionsData.context;
@@ -129,11 +140,18 @@ export default function graphqlHTTP(options: Options): Middleware {
       pretty = optionsData.pretty;
       graphiql = optionsData.graphiql;
       formatErrorFn = optionsData.formatError;
+      logFn = optionsData.logFn;
+
+      shouldLog = Boolean(logFn);
 
       validationRules = specifiedRules;
       if (optionsData.validationRules) {
         validationRules = validationRules.concat(optionsData.validationRules);
       }
+
+      if (shouldLog) { logFn('request.start'); }
+      // or maybe just log schema, context and rootValue?
+      if (shouldLog) { logFn('initialization', optionsData); }
 
       // GraphQL HTTP only supports GET and POST methods.
       if (request.method !== 'GET' && request.method !== 'POST') {
@@ -167,18 +185,27 @@ export default function graphqlHTTP(options: Options): Middleware {
       // Parse source to AST, reporting any syntax error.
       let documentAST;
       try {
+        if (shouldLog) { logFn('parse.start'); }
         documentAST = parse(source);
       } catch (syntaxError) {
         // Return 400: Bad Request if any syntax errors errors exist.
         response.status(400);
+        if (shouldLog) { logFn('parse.error', { errors: [ syntaxError ] }); }
         return { errors: [ syntaxError ] };
+      } finally {
+        if (shouldLog) { logFn('parse.end'); }
       }
 
       // Validate AST, reporting any errors.
+      if (shouldLog) { logFn('validation.start'); }
       const validationErrors = validate(schema, documentAST, validationRules);
+      if (shouldLog) { logFn('validation.end'); }
       if (validationErrors.length > 0) {
         // Return 400: Bad Request if any validation errors exist.
         response.status(400);
+        if (shouldLog) {
+          logFn('validation.error', { errors: validationErrors });
+        }
         return { errors: validationErrors };
       }
 
@@ -205,18 +232,25 @@ export default function graphqlHTTP(options: Options): Middleware {
       }
       // Perform the execution, reporting any errors creating the context.
       try {
+        if (shouldLog) { logFn('execution.start'); }
         return execute(
           schema,
           documentAST,
           rootValue,
           context,
           variables,
+          // logFn,
           operationName
         );
       } catch (contextError) {
         // Return 400: Bad Request if any execution context errors exist.
         response.status(400);
+        if (shouldLog) {
+          logFn('execution.error', { errors: [ contextError ] });
+        }
         return { errors: [ contextError ] };
+      } finally {
+        if (shouldLog) { logFn('execution.end'); }
       }
     }).catch(error => {
       // If an error was caught, report the httpError status, or 500.
@@ -234,6 +268,7 @@ export default function graphqlHTTP(options: Options): Middleware {
           .set('Content-Type', 'text/html')
           .send(renderGraphiQL({ query, variables, operationName, result }));
       } else {
+        logFn('request.end');
         // Otherwise, present JSON directly.
         response
           .set('Content-Type', 'application/json')
