@@ -140,9 +140,9 @@ export default function graphqlHTTP(options: Options): Middleware {
       pretty = optionsData.pretty;
       graphiql = optionsData.graphiql;
       formatErrorFn = optionsData.formatError;
-      logFn = optionsData.logFn;
+      logFn = optionsData.logFn || () => null;
 
-      shouldLog = Boolean(logFn);
+      shouldLog = Boolean(optionsData.logFn);
 
       validationRules = specifiedRules;
       if (optionsData.validationRules) {
