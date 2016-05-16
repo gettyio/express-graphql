@@ -60,6 +60,11 @@ export type OptionsData = {
    */
    logFn?: ?Function,
 
+   /**
+    * A function called to set extensions on the response
+    */
+   extensionsFn?: ?Function,
+
   /**
    * An optional function which will be used to format any errors produced by
    * fulfilling a GraphQL operation. If no function is provided, GraphQL's
@@ -105,6 +110,7 @@ export default function graphqlHTTP(options: Options): Middleware {
     let operationName;
     let validationRules;
     let logFn;
+    let extensionsFn;
     let shouldLog;
 
     // Promises are used as a mechanism for capturing any thrown errors during
@@ -133,6 +139,11 @@ export default function graphqlHTTP(options: Options): Middleware {
         throw new Error( 'LogFn must be a function' );
       }
 
+      if (optionsData.extensionsFn &&
+          typeof optionsData.extensionsFn !== 'function') {
+        throw new Error( 'ExtensionsFn must be a function' );
+      }
+
       function defaultLogFn() {
         // nothing
         return null;
@@ -146,6 +157,7 @@ export default function graphqlHTTP(options: Options): Middleware {
       graphiql = optionsData.graphiql;
       formatErrorFn = optionsData.formatError;
       logFn = optionsData.logFn || defaultLogFn;
+      extensionsFn = optionsData.extensionsFn;
 
       shouldLog = Boolean(optionsData.logFn);
 
@@ -262,6 +274,10 @@ export default function graphqlHTTP(options: Options): Middleware {
       if (result && result.errors) {
         if (shouldLog ) { logFn('request.errors', result.errors); }
         result.errors = result.errors.map(formatErrorFn || formatError);
+      }
+
+      if (result && extensionsFn) {
+        result.extensions = extensionsFn(result);
       }
 
       // If allowed to show GraphiQL, present it instead of JSON.

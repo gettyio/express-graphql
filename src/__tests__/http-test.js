@@ -1434,5 +1434,55 @@ describe('test harness', () => {
 
       });
     });
+    describe('extensionsFn', () => {
+
+
+      it('adds extension to result if extensionFn returns one.', async() => {
+        const app = express();
+
+        app.use(urlString(), graphqlHTTP({
+          schema: TestSchema,
+          extensionsFn: () => {
+            return { it: 'works' };
+          },
+        }));
+
+        const defaultResponse = await request(app)
+          .get(urlString({
+            query: '{test}'
+          }));
+
+        expect(defaultResponse.text).to.equal(
+          '{"data":{"test":"Hello World"},"extensions":{"it":"works"}}'
+        );
+
+      });
+    });
+
+    describe('logFn', () => {
+
+
+      it('actually logs events.', async() => {
+        const app = express();
+        const events = [];
+
+        app.use(urlString(), graphqlHTTP({
+          schema: TestSchema,
+          logFn: type => {
+            events.push(type);
+          },
+        }));
+
+        const defaultResponse = await request(app)
+          .get(urlString({
+            query: '{test}'
+          }));
+
+        expect(defaultResponse.text).to.equal(
+          '{"data":{"test":"Hello World"}}'
+        );
+        expect(events).to.contain('request.start');
+      });
+    });
   });
 });
