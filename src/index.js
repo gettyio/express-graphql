@@ -250,20 +250,17 @@ export default function graphqlHTTP(options: Options): Middleware {
       } catch (contextError) {
         // Return 400: Bad Request if any execution context errors exist.
         response.status(400);
-        if (shouldLog) {
-          logFn('execution.error', { errors: [ contextError ] });
-        }
         return { errors: [ contextError ] };
-      } finally {
-        if (shouldLog) { logFn('execution.end'); }
       }
     }).catch(error => {
       // If an error was caught, report the httpError status, or 500.
       response.status(error.status || 500);
       return { errors: [ error ] };
     }).then(result => {
+      if (shouldLog) { logFn('execution.end'); }
       // Format any encountered errors.
       if (result && result.errors) {
+        if (shouldLog ) { logFn('request.errors', result.errors); }
         result.errors = result.errors.map(formatErrorFn || formatError);
       }
 
