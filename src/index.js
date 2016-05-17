@@ -276,10 +276,6 @@ export default function graphqlHTTP(options: Options): Middleware {
         result.errors = result.errors.map(formatErrorFn || formatError);
       }
 
-      if (result && extensionsFn) {
-        result.extensions = extensionsFn(result);
-      }
-
       // If allowed to show GraphiQL, present it instead of JSON.
       if (showGraphiQL) {
         response
@@ -287,6 +283,10 @@ export default function graphqlHTTP(options: Options): Middleware {
           .send(renderGraphiQL({ query, variables, operationName, result }));
       } else {
         if (shouldLog) { logFn('request.end'); }
+        if (result && extensionsFn) {
+          result.extensions = extensionsFn(result);
+        }
+
         // Otherwise, present JSON directly.
         response
           .set('Content-Type', 'application/json')
