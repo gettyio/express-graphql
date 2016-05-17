@@ -176,9 +176,11 @@ export default function graphqlHTTP(options: Options): Middleware {
         throw httpError(405, 'GraphQL only supports GET and POST requests.');
       }
 
+      if (shouldLog) { logFn('parseBody.start'); }
       // Parse the Request body.
       return parseBody(request);
     }).then(data => {
+      if (shouldLog) { logFn('parseBody.end'); }
       showGraphiQL = graphiql && canDisplayGraphiQL(request, data);
 
       // Get GraphQL params from the request and POST body data.
