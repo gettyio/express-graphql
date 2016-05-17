@@ -184,6 +184,7 @@ export default function graphqlHTTP(options: Options): Middleware {
       showGraphiQL = graphiql && canDisplayGraphiQL(request, data);
 
       // Get GraphQL params from the request and POST body data.
+      if (shouldLog) { logFn('parseParams.start'); }
       const params = getGraphQLParams(request, data);
       query = params.query;
       variables = params.variables;
@@ -200,6 +201,8 @@ export default function graphqlHTTP(options: Options): Middleware {
 
       // GraphQL source.
       const source = new Source(query, 'GraphQL request');
+
+      if (shouldLog) { logFn('parseParams.end'); }
 
       // Parse source to AST, reporting any syntax error.
       let documentAST;
