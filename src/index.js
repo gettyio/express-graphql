@@ -167,8 +167,8 @@ export default function graphqlHTTP(options: Options): Middleware {
       }
 
       if (shouldLog) { logFn('request.start'); }
-      // or maybe just log schema, context and rootValue?
-      if (shouldLog) { logFn('initialization', optionsData); }
+      // TODO: log schema, context and rootValue?
+      // if (shouldLog) { logFn('initialization', optionsData); }
 
       // GraphQL HTTP only supports GET and POST methods.
       if (request.method !== 'GET' && request.method !== 'POST') {
@@ -190,6 +190,12 @@ export default function graphqlHTTP(options: Options): Middleware {
       variables = params.variables;
       operationName = params.operationName;
 
+      if (shouldLog) { logFn('request.query', query); }
+      if (shouldLog) { logFn('request.variables', variables); }
+      if (shouldLog) { logFn('request.operationName', operationName); }
+      if (shouldLog) { logFn('request.rootValue', rootValue); }
+      if (shouldLog) { logFn('request.context', context); }
+
       // If there is no query, but GraphiQL will be displayed, do not produce
       // a result, otherwise return a 400: Bad Request.
       if (!query) {
@@ -202,6 +208,7 @@ export default function graphqlHTTP(options: Options): Middleware {
       // GraphQL source.
       const source = new Source(query, 'GraphQL request');
 
+      // TODO make all these tracing things back to back, so it adds up.
       if (shouldLog) { logFn('parseParams.end'); }
 
       // Parse source to AST, reporting any syntax error.
