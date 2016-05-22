@@ -294,12 +294,13 @@ export default function graphqlHTTP(options: Options): Middleware {
           .set('Content-Type', 'text/html')
           .send(renderGraphiQL({ query, variables, operationName, result }));
       } else {
+        // Otherwise, present JSON directly.
+        if (shouldLog) { logFn('request.result', result); }
         if (shouldLog) { logFn('request.end'); }
         if (result && extensionsFn) {
           result.extensions = extensionsFn(result);
         }
 
-        // Otherwise, present JSON directly.
         response
           .set('Content-Type', 'application/json')
           .send(JSON.stringify(result, null, pretty ? 2 : 0));
