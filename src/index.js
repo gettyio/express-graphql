@@ -190,12 +190,6 @@ export default function graphqlHTTP(options: Options): Middleware {
       variables = params.variables;
       operationName = params.operationName;
 
-      if (shouldLog) { logFn('request.query', query); }
-      if (shouldLog) { logFn('request.variables', variables); }
-      if (shouldLog) { logFn('request.operationName', operationName); }
-      if (shouldLog) { logFn('request.rootValue', rootValue); }
-      if (shouldLog) { logFn('request.context', context); }
-
       // If there is no query, but GraphiQL will be displayed, do not produce
       // a result, otherwise return a 400: Bad Request.
       if (!query) {
@@ -210,6 +204,12 @@ export default function graphqlHTTP(options: Options): Middleware {
 
       // TODO make all these tracing things back to back, so it adds up.
       if (shouldLog) { logFn('parseParams.end'); }
+
+      if (shouldLog) { logFn('request.query', query); }
+      if (shouldLog) { logFn('request.variables', variables); }
+      if (shouldLog) { logFn('request.operationName', operationName); }
+      if (shouldLog) { logFn('request.rootValue', rootValue); }
+      if (shouldLog) { logFn('request.context', context); }
 
       // Parse source to AST, reporting any syntax error.
       let documentAST;
@@ -295,15 +295,17 @@ export default function graphqlHTTP(options: Options): Middleware {
           .send(renderGraphiQL({ query, variables, operationName, result }));
       } else {
         // Otherwise, present JSON directly.
-        if (shouldLog) { logFn('request.result', result); }
-        if (shouldLog) { logFn('request.end'); }
         if (result && extensionsFn) {
           result.extensions = extensionsFn(result);
         }
 
+        const resultJSON = JSON.stringify(result, null, pretty ? 2 : 0);
+        if (shouldLog) { logFn('request.result', { len: resultJSON.length }); }
         response
           .set('Content-Type', 'application/json')
-          .send(JSON.stringify(result, null, pretty ? 2 : 0));
+          .send(resultJSON);
+        // XXX could we log the response headers? Should we?
+        if (shouldLog) { logFn('request.end'); }
       }
     });
   };
