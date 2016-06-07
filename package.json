@@ -1,6 +1,6 @@
 {
   "name": "express-widgetizer",
-  "version": "0.5.10",
+  "version": "0.5.11",
   "description": "Create a GraphQL HTTP server with Express.",
   "contributors": [
     "Jonas Helfer <jonas@helfer.email>"
