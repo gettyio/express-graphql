@@ -268,8 +268,8 @@ export default function graphqlHTTP(options: Options): Middleware {
           rootValue,
           context,
           variables,
-          // logFn,
-          operationName
+          operationName,
+          logFn
         );
       } catch (contextError) {
         // Return 400: Bad Request if any execution context errors exist.
